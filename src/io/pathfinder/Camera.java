@@ -225,8 +225,8 @@ public class Camera {
 		return viewMatrix;
 	}
 
-	public void rotate(double dx, double dy) {
-		transform.rotateByDegree(-dy / 2, dx / 2, 0);
+	public void rotateByMouse(double dx, double dy) {
+		transform.rotateByDegree(dy / 3.0, dx / 3.0, 0);
 	}
 
 	public Matrix getProjectionMatrix() {

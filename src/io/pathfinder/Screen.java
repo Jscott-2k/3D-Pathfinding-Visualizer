@@ -22,7 +22,7 @@ public class Screen extends Canvas implements Runnable {
 
 	public static final int WIDTH = 800;
 	public static final int HEIGHT = 600;
-	public static final int TARGET_FPS = 24; 
+	public static final int TARGET_FPS = 160; 
 	
 	public static final String TITLE = "3D Pathfinding Visualizer";
 	
@@ -30,7 +30,7 @@ public class Screen extends Canvas implements Runnable {
 	private BufferStrategy bufferStrategy;
 	private JFrame frame;
 	
-	private ArrayList<EndCrystal> endCrystals;
+	private ArrayList<CubeGroup> endCrystals;
 	
 	private Camera camera;
 
@@ -41,10 +41,6 @@ public class Screen extends Canvas implements Runnable {
 	
 	private InputHandler inputHandler;
 	private Crosshair crosshair;
-	private Robot robot;
-	private int lx = 0, ly = 0;
-	
-	
 	
 	public void createDisplay() {
 		
@@ -58,9 +54,8 @@ public class Screen extends Canvas implements Runnable {
 		addMouseMotionListener(inputManager);
 		addMouseWheelListener(inputManager);
 		setCursor(frame.getToolkit().createCustomCursor(
-	            new BufferedImage(3, 3, BufferedImage.TYPE_INT_ARGB), new Point(0, 0),
+	            new BufferedImage(2, 2, BufferedImage.TYPE_INT_ARGB), new Point(0, 0),
 	            "null"));
-		
 		frame.add(this);
 		frame.pack();
 			
@@ -75,9 +70,6 @@ public class Screen extends Canvas implements Runnable {
 	
 	
 	private void loadInputEvents() throws AWTException {
-		robot = new Robot();
-
-
 		
 		camera.addInputEvents(inputHandler);
 		inputHandler.addEvent(new KeyInputEvent(KeyEvent.VK_ESCAPE) {
@@ -90,21 +82,7 @@ public class Screen extends Canvas implements Runnable {
 			}
 			
 		});
-		inputHandler.getManager().setOnMove((e) -> {
-//			int x = e.getXOnScreen();
-//			int y = e.getYOnScreen();
-//			
-//			int dx = x - lx;
-//			int dy = y - ly;
-//			camera.rotate(dx, dy);
-//			System.out.println(dx);
-//			lx = x;
-//			ly = y;
-//
-//			if(Math.abs(dx) > 0 && Math.abs(dy) > 0) {
-//				//robot.mouseMove(cx, cy);
-//			}
-			
+		inputHandler.getManager().setOnMove((e) -> {			
 		});
 	}
 	
@@ -113,10 +91,11 @@ public class Screen extends Canvas implements Runnable {
 
 		
 		createDisplay();
-
+		int screenCenterX = (int) (frame.getX() + WIDTH / 2.0);
+		int screenCenterY = (int) (frame.getY() + HEIGHT / 2.0);
 
 		camera = new Camera();
-		crosshair = new Crosshair();
+		crosshair = new Crosshair(screenCenterX, screenCenterY);
 		try {
 			loadInputEvents();
 		} catch (AWTException e) {
@@ -125,12 +104,13 @@ public class Screen extends Canvas implements Runnable {
 		
 		crosshair.setSize(10);
 		rendering = true;
-		endCrystals = new ArrayList<EndCrystal>();		
+		endCrystals = new ArrayList<CubeGroup>();		
 
-		for(int i=0;i<12;i++) {
-			for(int j=0;j<8;j++) {
-				endCrystals.add(new EndCrystal(i*12, 0, -60 - (j * 12)));
-
+		for(int i=0;i<16;i++) {
+			for(int j=0;j<16;j++) {
+				for(int k=0;k<16;k++) {
+					endCrystals.add(new CubeGroup(i*12, k*12, -60 - (j * 12)));
+				}
 			}
 		}
 		
@@ -167,38 +147,16 @@ public class Screen extends Canvas implements Runnable {
 	}
 	
 	private void update() {
-		for(EndCrystal endCrystal : endCrystals) {
+		
+		for(CubeGroup endCrystal : endCrystals) {
 			endCrystal.update();
 		}
-		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		
-
+		int screenCenterX = (int) (frame.getX() + WIDTH / 2.0);
+		int screenCenterY = (int) (frame.getY() + HEIGHT / 2.0);
 		
-			int x = MouseInfo.getPointerInfo().getLocation().x;
-			int y = MouseInfo.getPointerInfo().getLocation().y;
-			
-			int cx = (int) (frame.getX() + WIDTH / 2.0);
-			int cy = (int) (frame.getY() + HEIGHT / 2.0);
-			
-			int dx = x - lx;
-			int dy = y - ly;
-			
-			
-			camera.rotate(dx, dy);
-			
-			System.out.println(dx);
-			
-			lx = x;
-			ly = y;
+		crosshair.update(screenCenterX, screenCenterY, camera);
 	
-			if(Math.abs(dx) > 1 || Math.abs(dy) > 1) {
-				robot.mouseMove(cx, cy);
-				lx = cx;
-				ly = cy;
-			}
-
-		
-		
 		inputHandler.handle();
 		
 	}
@@ -207,35 +165,30 @@ public class Screen extends Canvas implements Runnable {
 	
 		bufferStrategy = getBufferStrategy();
 		if(bufferStrategy == null) {
-			createBufferStrategy(4);
+			createBufferStrategy(3);
 			return;
 		}
 		Graphics graphics = bufferStrategy.getDrawGraphics();
 		
 		
-		graphics.setColor(Color.BLACK);		
+		graphics.setColor(Color.LIGHT_GRAY);		
 		graphics.fillRect(0, 0, WIDTH, HEIGHT);
 
 		camera.createView();
 		
-		for(EndCrystal endCrystal : endCrystals) {
+		for(CubeGroup endCrystal : endCrystals) {
 			endCrystal.render(graphics, camera);
 		}
 	
 		crosshair.render(graphics, WIDTH / 2, HEIGHT / 2);
 		
-		Font f = new Font("verdana", Font.PLAIN, 16);
+		Font f = new Font("verdana", Font.BOLD, 18);
 		graphics.setFont(f);
-		graphics.setColor(Color.YELLOW);
+		graphics.setColor(Color.RED);
 		graphics.drawString(camera.getPosition(), 0, HEIGHT - 48);
 		
 		graphics.dispose();
 		bufferStrategy.show();
 	}
-	
-	@Override
-	public void paint(Graphics g) {
 
-
-	}
 }
