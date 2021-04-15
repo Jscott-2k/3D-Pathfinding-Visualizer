@@ -1,5 +1,6 @@
 package io.pathfinder;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,10 +8,14 @@ import java.util.Comparator;
 
 import io.pathfinder.math.Matrix;
 import io.pathfinder.math.Vector3d;
+import io.pathfinder.math.Vector4d;
 
 public class Mesh {
+	
 	private ArrayList<Triangle> triangles;
 	private Transform transform;
+	private boolean isWireframe;
+	private double averageProjectedZ = 0;
 	
 	public Mesh(Vector3d position, Vector3d rotation) {
 		triangles = new ArrayList<Triangle>();
@@ -24,13 +29,19 @@ public class Mesh {
 	}
 
 	public void render(Graphics graphics, Camera camera) {
-		
-		Matrix meshViewMatrix = Matrix.MultiplyMatrix(transform.getTransformationMatrix(), camera.getView());
+		Matrix meshMatrix = transform.getTransformationMatrix();
+		Matrix meshViewMatrix = Matrix.MultiplyMatrix(meshMatrix, camera.getView());
 
-		for(Triangle tri : triangles) {
-			tri.render(graphics, camera, meshViewMatrix);
+		if(isWireframe) {
+			for(Triangle tri : triangles) {
+				tri.renderWire(graphics, camera, meshViewMatrix, meshMatrix);
+			}
+		}else {
+			for(Triangle tri : triangles) {
+				tri.renderFill(graphics, camera, meshViewMatrix, meshMatrix);
+			}
 		}
-		
+			
 	}
 	
 	public void rotate(double xDegrees,double yDegrees,double zDegrees){
@@ -42,8 +53,7 @@ public class Mesh {
 		
 		rotation.add(new Vector3d(xRadians, yRadians, zRadians));
 		transform.setRotation(rotation);
-		
-
+	
 	}
 	
 	public Transform getTransform(){
@@ -69,6 +79,34 @@ public class Mesh {
 			}
 		});
 		return triangles;
+	}
+
+	public boolean isWireframe() {
+		return isWireframe;
+	}
+
+	public void setWireframe(boolean isWireframe) {
+		this.isWireframe = isWireframe;
+	}
+
+	public double calcAverageProjectedZ() {
+		int numTris = triangles.size();
+		double sum = 0;
+		for(Triangle tri : triangles) {
+			sum+=tri.getAverageZ();
+		}
+		averageProjectedZ = sum / (double)numTris;
+		return averageProjectedZ;
+	}
+
+	public ArrayList<Triangle> getTriangles() {
+		return triangles;
+	}
+
+	public void setColor(Color color) {
+		for(Triangle tri : triangles) {
+			tri.setColor(color);
+		}
 	}
 
 }

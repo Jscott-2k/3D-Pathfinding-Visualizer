@@ -13,7 +13,9 @@ import io.pathfinder.math.Vector4d;
 public class Camera {
 	
 	private double near, far, fieldOfView, aspectRatio, fieldOfViewAngle;
+	private ScreenConfiguration screenConfiguration;
 	private Transform transform;
+	
 	private Matrix projectionMatrix;
 	private Matrix cameraMatrix;
 	private Matrix viewMatrix;
@@ -23,42 +25,59 @@ public class Camera {
 	private Vector3d vTarget;
 	private double moveSpeed;
 	private Vector3d vLookDir;
+	
 	private Vector3d nForward;
+	private Vector3d vForward;
 	private Vector3d nUp;
 	private Vector3d nRight;
 	
-	public Camera() {
-		
-		moveSpeed = 1;
+	private boolean splitScreen = false;
+	private int splitScreenXMod = 1;
+	
+	public Camera(double moveSpeed, double near, double far, double fieldOfView, ScreenConfiguration screenConfiguration) {
 		transform = new Transform();
-		near = .1;
-		far = 1000.0;
-		fieldOfView = 120.0;
-		aspectRatio = (double) Screen.HEIGHT / (double) Screen.WIDTH;
-		fieldOfViewAngle = 1 / Math.tan( Math.toRadians(fieldOfView/2)); 
-		double aspectFovA = 1 / (aspectRatio * Math.tan( Math.toRadians(fieldOfView/2)));
+		this.moveSpeed = moveSpeed;
+		this.screenConfiguration = screenConfiguration;
 		
-		projectionMatrix = MatrixBuilder.getProjectionMatrix(aspectRatio, fieldOfViewAngle, aspectFovA,far, near);		
+		//setSplitScreen(false);
+		loadProjectionMatrix(near,far, fieldOfView, screenConfiguration);
 	}
 
+	
+	public void loadProjectionMatrix(double near, double far, double fieldOfView, ScreenConfiguration screenConfiguration) {
+		
+		this.screenConfiguration = screenConfiguration;
+		this.near = near;
+		this.far = far;
+		this.fieldOfView = fieldOfView;
+		
+		this.aspectRatio = (double)screenConfiguration.getHeight() / (double)screenConfiguration.getWidth() * splitScreenXMod;
+		fieldOfViewAngle = 1 / Math.tan( Math.toRadians(fieldOfView/2)); 
+		double aspectFovA = 1 / (aspectRatio * Math.tan( Math.toRadians(fieldOfView/2)));
+		projectionMatrix = MatrixBuilder.getProjectionMatrix(aspectRatio, fieldOfViewAngle, aspectFovA,far, near);	
+	}
+	
+	public void setSplitScreen(boolean splitScreen) {
+		this.splitScreen = splitScreen;
+		this.splitScreenXMod = splitScreen ? 2 : 1;
+		loadProjectionMatrix(near, far, fieldOfView, screenConfiguration);
+	}
+	
 	public void update() {
 		createView();
 	}
 	
 	public Matrix lookAt(Vector3d position, Vector3d target, Vector3d up) {
 		
-		
 		nForward = Vector3d.subtract(target,position);
-		Vector3d a = Vector3d.multiply(nForward,Vector3d.dot(up, nForward));
 		nRight = Vector3d.cross(up, nForward);
 		nUp = nRight.cross(nForward);
 		
-		
+		vForward = nForward.copy();
 		nForward.normalize();
 		nUp.normalize();
 		nRight.normalize();
-		
-		
+				
 		Matrix m = new Matrix(4,4);
 		
 		m.set(0, 0, nRight.getX()); 
@@ -79,34 +98,26 @@ public class Camera {
 		
 		m.set(3, 3, 1);
 		
-		
-		
-		
 		return m;
 		
 	}
 
 	public Matrix createView() {
 		
-		
-		//vLookDirection = Vector4d.BuildFromMatrix(Matrix.MultiplyMatrixVector(transform.getRotationMatrix(),new Vector4d(vTarget,1)));
 	
-		//vTarget = Vector3d.add(transform.getPosition(), new Vector3d(vLookDirection));
 		vTarget = new Vector3d(0,0,1);
 				
 		vLookDir = new Vector3d(
 				Vector4d.BuildFromMatrix(
 						Matrix.MultiplyMatrixVector(transform.getRotationMatrix(), new Vector4d(vTarget,0))));
+		
 		vTarget = Vector3d.add(transform.getPosition(), vLookDir);
 		
-		cameraMatrix = lookAt(transform.getPosition(),vTarget, vUp);
-		//this.viewMatrix = Matrix.QuickInverse(cameraMatrix);
+		cameraMatrix = lookAt(transform.getPosition(), vTarget, vUp);
+
 		this.viewMatrix = cameraMatrix.getInverse();
 		
-//		System.out.println("Quick Inverse");
-//		System.out.println(Matrix.QuickInverse(cameraMatrix));
-//		System.out.println("Normal Inverse");
-//		System.out.println(viewMatrix);
+		//System.out.println(viewMatrix);
 		
 		return viewMatrix;
 	
@@ -116,6 +127,7 @@ public class Camera {
 		return getProjection(mvm, new Vector4d(v3d, 1));
 	}
 	public Vector4d getProjection(Matrix mvm, Vector4d v4d) {
+		
 		
 		Matrix projectionResult = Matrix.MultiplyMatrixVector(Matrix.MultiplyMatrix(mvm,projectionMatrix), v4d);
 		
@@ -129,16 +141,21 @@ public class Camera {
 		if(projectedResultVector.getW()!=0) {
 			x /= w;
 			y /= w;
-
 		}
 
-		x *= (double) Screen.WIDTH / 2.0;
-		y *= (double) Screen.HEIGHT / 2.0;
+		x *= (double) screenConfiguration.getWidth() / (2.0 * splitScreenXMod);
+		y *= (double) screenConfiguration.getHeight() / 2.0;
 		
-		x += (double) Screen.WIDTH / 2.0;
-		y += (double) Screen.HEIGHT / 2.0;
+		x += (splitScreenXMod - 1 ) * (screenConfiguration.getWidth() / 2.0);
+	
+		x += (double) screenConfiguration.getWidth() / (2.0 * splitScreenXMod);
+		y += (double) screenConfiguration.getHeight() / 2.0;
 		
 		return (new Vector4d(x, y, z, w));
+	}
+	
+	public boolean isSplitScreen() {
+		return this.splitScreen;
 	}
 	
 	public void addInputEvents(InputHandler inputHandler) {
@@ -149,6 +166,12 @@ public class Camera {
 				Vector3d f = Vector3d.multiply(nForward, moveSpeed);
 				transform.translate(f);
 			}
+
+			@Override
+			public void onKeyRelease() {
+				// TODO Auto-generated method stub
+				
+			}
 		});
 		
 		inputHandler.addEvent(new KeyInputEvent(KeyEvent.VK_S) {
@@ -157,6 +180,12 @@ public class Camera {
 				Vector3d f = Vector3d.multiply(nForward, -moveSpeed);
 				transform.translate(f);
 			}
+
+			@Override
+			public void onKeyRelease() {
+				// TODO Auto-generated method stub
+				
+			}
 		});
 		
 		inputHandler.addEvent(new KeyInputEvent(KeyEvent.VK_A) {
@@ -164,6 +193,12 @@ public class Camera {
 			public void onKeyDown() {
 				Vector3d f = Vector3d.multiply(nRight, -moveSpeed);
 				transform.translate(f);
+				
+			}
+
+			@Override
+			public void onKeyRelease() {
+				// TODO Auto-generated method stub
 				
 			}
 		});
@@ -176,6 +211,12 @@ public class Camera {
 				
 				transform.translate(0,-moveSpeed,0);
 			}
+
+			@Override
+			public void onKeyRelease() {
+				// TODO Auto-generated method stub
+				
+			}
 		});
 		
 		inputHandler.addEvent(new KeyInputEvent(KeyEvent.VK_SPACE) {
@@ -186,6 +227,12 @@ public class Camera {
 				
 				transform.translate(0,moveSpeed,0);
 			}
+
+			@Override
+			public void onKeyRelease() {
+				// TODO Auto-generated method stub
+				
+			}
 		});
 		
 		inputHandler.addEvent(new KeyInputEvent(KeyEvent.VK_A) {
@@ -193,6 +240,12 @@ public class Camera {
 			public void onKeyDown() {
 				Vector3d f = Vector3d.multiply(nRight, -moveSpeed);
 				transform.translate(f);
+				
+			}
+
+			@Override
+			public void onKeyRelease() {
+				// TODO Auto-generated method stub
 				
 			}
 		});
@@ -203,22 +256,15 @@ public class Camera {
 				Vector3d f = Vector3d.multiply(nRight, moveSpeed);
 				transform.translate(f);	
 			}
-		});
-		
-		
-		inputHandler.addEvent(new KeyInputEvent(KeyEvent.VK_Q) {
+
 			@Override
-			public void onKeyDown() {
-				transform.rotateByDegree(moveSpeed,0,0);
+			public void onKeyRelease() {
+				// TODO Auto-generated method stub
+				
 			}
 		});
 		
-		inputHandler.addEvent(new KeyInputEvent(KeyEvent.VK_E) {
-			@Override
-			public void onKeyDown() {
-				transform.rotateByDegree(-moveSpeed,0,0);
-			}
-		});
+
 	}
 	
 	public Matrix getView() {
@@ -226,14 +272,39 @@ public class Camera {
 	}
 
 	public void rotateByMouse(double dx, double dy) {
-		transform.rotateByDegree(dy / 3.0, dx / 3.0, 0);
+		transform.rotateByDegree(dy / 5.0, dx / 5.0, 0);
 	}
 
 	public Matrix getProjectionMatrix() {
 		return this.projectionMatrix;
 	}
 
-	public String getPosition() {
+	public String getPositionAsString() {
 		return transform.getPosition().toString();
+	}
+	public Vector3d getNormForward() {
+		return nForward;
+	}
+	public boolean needCull(Vector3d v0, Vector3d surfaceNormal) {
+		Vector3d vCameraRay = Vector3d.subtract( v0,vForward);
+		//return false;
+		return Vector3d.dot(surfaceNormal,vCameraRay) < 0 ;
+	}
+
+	public Vector3d getPosition() {
+		return transform.getPosition();
+	}
+
+	public ScreenConfiguration getScreenConfiguration() {
+		return screenConfiguration;
+	}
+
+	public double getNear() {
+		return this.near;
+	}
+
+	public double getFar() {
+		// TODO Auto-generated method stub
+		return this.far;
 	}
 }

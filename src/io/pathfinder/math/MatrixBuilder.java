@@ -53,7 +53,7 @@ final public class MatrixBuilder {
 		projectionMatrix.set(0, 0, aspectRatio * fieldOfViewAngle);
 		projectionMatrix.set(1, 1, fieldOfViewAngle);
 		projectionMatrix.set(2, 2, far / (far - near));
-		projectionMatrix.set(3, 2, (far * near) / (far - near));
+		projectionMatrix.set(3, 2, (-far * near) / (far - near));
 		projectionMatrix.set(2, 3, 1);
 		
 //		projectionMatrix.set(0, 0, aspectRatio * fieldOfViewAngle);
@@ -65,8 +65,7 @@ final public class MatrixBuilder {
 		return projectionMatrix;
 		
 	}
-	
-	
+
 	public static Matrix getTranslationMatrix(double xOffset, double yOffset, double zOffset)
 	{
 		Matrix translationMatrix = new Matrix(4);
@@ -78,7 +77,7 @@ final public class MatrixBuilder {
 		translationMatrix.set(3, 0, xOffset);
 		translationMatrix.set(3, 1, yOffset);
 		translationMatrix.set(3, 2, zOffset);
-		translationMatrix.set(3, 3, 1);
+		translationMatrix.set(3, 3, -1);
 		
 		return translationMatrix;
 	}

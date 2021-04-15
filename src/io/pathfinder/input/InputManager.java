@@ -10,39 +10,57 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.HashMap;
 
-public class InputManager implements KeyListener, MouseListener, MouseWheelListener, MouseMotionListener{
+public class InputManager implements KeyListener, MouseListener, MouseWheelListener, MouseMotionListener {
 
-	private HashMap<Integer, Boolean> keyDownMap;
-	
-	
+	private HashMap<Integer, KeyState> keyStateMap;
+
 	private MouseInputEvent onMove;
 	private MouseInputEvent onLeftPress;
 	private MouseInputEvent onLeftRelease;
 	private MouseInputEvent onRightPress;
 	private MouseInputEvent onRightRelease;
 	private MouseInputEvent onScroll;
-	
+	private MouseInputEvent onMouseWheelMoveDown;
+	private MouseInputEvent onMouseWheelMoveUp;
+
+	public void setOnMouseWheelMoveDown(MouseInputEvent onMouseWheelMoveDown) {
+		this.onMouseWheelMoveDown = onMouseWheelMoveDown;
+	}
+
+	public void setOnMouseWheelMoveUp(MouseInputEvent onMouseWheelMoveUp) {
+		this.onMouseWheelMoveUp = onMouseWheelMoveUp;
+	}
+
 	public InputManager() {
-		this.keyDownMap = new HashMap<Integer, Boolean>();
+		this.keyStateMap = new HashMap<Integer, KeyState>();
 	}
-	
-	public HashMap<Integer, Boolean> getKeyDownMap() {
-		return keyDownMap;
+
+	public HashMap<Integer, KeyState> getKeyStateMap() {
+		return keyStateMap;
 	}
-	
-	
+
 	@Override
 	public void keyPressed(KeyEvent e) {
 		int keyCode = e.getKeyCode();
-		keyDownMap.put(keyCode, true);
+		
+		if(e.isControlDown()) {
+			return;
+		}
+		
+		keyStateMap.put(keyCode, KeyState.PRESS);
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
 		int keyCode = e.getKeyCode();
-		keyDownMap.put(keyCode, false);
+		
+		if(keyStateMap.get(keyCode)!=KeyState.PRESS) {
+			return;
+		}
+		
+		keyStateMap.put(keyCode, KeyState.RELEASE);
 	}
-	
+
 	@Override
 	public void keyTyped(KeyEvent e) {
 
@@ -55,30 +73,33 @@ public class InputManager implements KeyListener, MouseListener, MouseWheelListe
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
-
 		this.onMove.onEvent(e);
 	}
 
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
-		// TODO Auto-generated method stub
+		if(e.getWheelRotation() < 0 ) {
+			onMouseWheelMoveDown.onEvent(e);
+		}else {
+			onMouseWheelMoveUp.onEvent(e);
+		}
 		
 	}
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		
-		switch(e.getButton() ) {
-			case MouseEvent.BUTTON1:
-				this.onLeftPress.onEvent(e);
-				break;
-			case MouseEvent.BUTTON2:
-				this.onRightPress.onEvent(e);
-				break;
-			default:
-				break;
-		}
-		
+
+//		switch(e.getButton() ) {
+//			case MouseEvent.BUTTON1:
+//				this.onLeftPress.onEvent(e);
+//				break;
+//			case MouseEvent.BUTTON3:
+//				this.onRightPress.onEvent(e);
+//				break;
+//			default:
+//				break;
+//		}
+
 	}
 
 	@Override
@@ -93,14 +114,32 @@ public class InputManager implements KeyListener, MouseListener, MouseWheelListe
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-
+		switch (e.getButton()) {
+		case MouseEvent.BUTTON1:
+			this.onLeftPress.onEvent(e);
+			break;
+		case MouseEvent.BUTTON3:
+			this.onRightPress.onEvent(e);
+			break;
+		default:
+			break;
+		}
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-
+		switch (e.getButton()) {
+		case MouseEvent.BUTTON1:
+			this.onLeftRelease.onEvent(e);
+			break;
+		case MouseEvent.BUTTON3:
+			this.onRightRelease.onEvent(e);
+			break;
+		default:
+			break;
+		}
 	}
-	
+
 	public MouseInputEvent getOnMove() {
 		return onMove;
 	}
@@ -149,9 +188,8 @@ public class InputManager implements KeyListener, MouseListener, MouseWheelListe
 		this.onScroll = onScroll;
 	}
 
-	public void setKeyDownMap(HashMap<Integer, Boolean> keyDownMap) {
-		this.keyDownMap = keyDownMap;
+	public void setKeyDownMap(HashMap<Integer, KeyState> keyStateMap) {
+		this.keyStateMap = keyStateMap;
 	}
-
 
 }

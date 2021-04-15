@@ -40,7 +40,7 @@ public class Vector3d extends Vector{
 	
 	@Override
 	public String toString() {
-		return x + ", " + y + ", " + z;
+		return (float)x + ", " + (float)y + ", " + (float)z;
 	}
 
 	public Matrix toMatrix() {
