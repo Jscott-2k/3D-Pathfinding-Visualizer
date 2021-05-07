@@ -10,15 +10,18 @@ public class NodeArray implements java.io.Serializable {
 	private Node[][][] nodes;
 	private int size;
 
-	public NodeArray(CubeNode[][][] data) {
-		this.size = data.length;
-		this.nodes = new Node[size][size][size];
 
+	public NodeArray(int size) {
+		this.size = size;
+		this.nodes = new Node[size][size][size];
+	}
+	
+	public void bind(CubeNode[][][] data) {
 		for (int x = 0; x < size; x++) {
 			for (int y = 0; y < size; y++) {
 				for (int z = 0; z < size; z++) {
 					nodes[x][y][z] = data[x][y][z].getNode();
-				
+
 				}
 			}
 		}
@@ -29,7 +32,6 @@ public class NodeArray implements java.io.Serializable {
 				}
 			}
 		}
-		
 	}
 
 	public void setNeighbors(Node currentNode) {

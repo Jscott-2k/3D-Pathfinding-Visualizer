@@ -50,7 +50,7 @@ public class Square extends Rectangle2D.Double{
 	public void render(Graphics2D g){
 		g.setStroke(OUTLINE_STROKE);
 
-		g.setColor(isHover ? nodeType.getColor().darker() : nodeType.getColor());
+		g.setColor(isHover ? getColor().darker() : getColor());
 		g.fill(this);
 		
 		g.setColor(isHover ? Color.GRAY : Color.BLACK);
@@ -65,5 +65,9 @@ public class Square extends Rectangle2D.Double{
 	}
 	public NodeType getNodeType() {
 		return this.nodeType;
+	}
+
+	public void setNode(Node node) {
+		this.node = node;
 	}
 }

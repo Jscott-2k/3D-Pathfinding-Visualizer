@@ -26,8 +26,12 @@ public class FileMenu extends JMenu {
 	private JMenuItem openLayout;
 	private JMenuItem saveLayout;
 
+	private String workingDir;
+
 	public FileMenu() {
 		super("File");
+
+		this.workingDir = System.getProperty("user.dir") + "/saves";
 		newLayout = new JMenuItem("new");
 		openLayout = new JMenuItem("open");
 		saveLayout = new JMenuItem("save");
@@ -46,7 +50,14 @@ public class FileMenu extends JMenu {
 			public void actionPerformed(ActionEvent event) {
 				System.out.println("SAVING...");
 				try {
-					CubicGridSaveManager.getCubicGridSaver().save();
+					JFileChooser fileChooser = new JFileChooser();
+					fileChooser.setFileFilter(new FileNameExtensionFilter(".p3dv", "p3dv"));
+
+					fileChooser.setCurrentDirectory(new File(workingDir));
+					int selection = fileChooser.showSaveDialog(null);
+					if (selection == JFileChooser.APPROVE_OPTION) {
+						CubicGridSaveManager.getCubicGridSaver().save(fileChooser.getSelectedFile() + ".p3dv");
+					}
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -63,18 +74,17 @@ public class FileMenu extends JMenu {
 				try {
 					fileChooser.setAcceptAllFileFilterUsed(false);
 					fileChooser.setFileFilter(new FileNameExtensionFilter(".p3dv", "p3dv"));
+					fileChooser.setCurrentDirectory(new File(workingDir));
 					fileChooser.showOpenDialog(null);
 					File file = fileChooser.getSelectedFile();
-					
-					if(file==null) {
+
+					if (file == null) {
 						throw new NullPointerException();
 					}
-					
-					if(CubicGridSaveManager.getCubicGridSaver().load(file)) {
+
+					if (CubicGridSaveManager.getCubicGridSaver().load(file)) {
 						System.out.println("\tLOADED SAVE!");
 					}
-					
-					
 
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -86,6 +96,15 @@ public class FileMenu extends JMenu {
 		openLayout.setMnemonic(KeyEvent.VK_O);
 		openLayout.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
 
-	}
+		newLayout.addActionListener(new ActionListener() {
 
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				CubicGridSaveManager.getCubicGridSaver().getCubicGrid().reset();
+			}
+		});
+		
+		newLayout.setMnemonic(KeyEvent.VK_N);
+		newLayout.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
+	}
 }

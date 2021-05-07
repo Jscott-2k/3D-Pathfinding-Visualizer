@@ -8,6 +8,10 @@ public class CubicGridSaveManager {
 
 	private static CubicGridSaveManager INSTANCE;
 
+	/**
+	 * 
+	 * @return
+	 */
 	public static CubicGridSaveManager getCubicGridSaver() {
 		if (INSTANCE == null) {
 			INSTANCE = new CubicGridSaveManager();
@@ -15,6 +19,9 @@ public class CubicGridSaveManager {
 		return INSTANCE;
 	}
 
+	/**
+	 * 
+	 */
 	private CubicGridSaveManager() {
 	}
 
@@ -30,10 +37,15 @@ public class CubicGridSaveManager {
 		return this.cubicGrid;
 	}
 
-	public void save() throws IOException {
-		FileOutputStream fOut = new FileOutputStream("save.p3dv");
+	/**
+	 * 
+	 * @param name
+	 * @throws IOException
+	 */
+	public void save(String name) throws IOException {
+		FileOutputStream fOut = new FileOutputStream(name);
 		ObjectOutputStream out = new ObjectOutputStream(fOut);
-		System.out.println("\t WRITING node array to \"save.p3dv\"...");
+		System.out.println("\t WRITING node array to \" +" + name + "\"...");
 		out.writeObject(cubicGrid.getData().getNodeArray());
 		out.close();
 		fOut.close();

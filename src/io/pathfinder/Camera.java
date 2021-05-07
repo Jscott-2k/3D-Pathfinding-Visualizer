@@ -10,6 +10,11 @@ import io.pathfinder.math.Vector2d;
 import io.pathfinder.math.Vector3d;
 import io.pathfinder.math.Vector4d;
 
+/**
+ * 
+ * @author Justin Scott
+ *
+ */
 public class Camera {
 	
 	private double near, far, fieldOfView, aspectRatio, fieldOfViewAngle;
@@ -43,7 +48,13 @@ public class Camera {
 		loadProjectionMatrix(near,far, fieldOfView, screenConfiguration);
 	}
 
-	
+	/**
+	 * 
+	 * @param near
+	 * @param far
+	 * @param fieldOfView
+	 * @param screenConfiguration
+	 */
 	public void loadProjectionMatrix(double near, double far, double fieldOfView, ScreenConfiguration screenConfiguration) {
 		
 		this.screenConfiguration = screenConfiguration;
@@ -57,6 +68,10 @@ public class Camera {
 		projectionMatrix = MatrixBuilder.getProjectionMatrix(aspectRatio, fieldOfViewAngle, aspectFovA,far, near);	
 	}
 	
+	/**
+	 * 
+	 * @param splitScreen
+	 */
 	public void setSplitScreen(boolean splitScreen) {
 		this.splitScreen = splitScreen;
 		this.splitScreenXMod = splitScreen ? 2 : 1;
@@ -67,6 +82,13 @@ public class Camera {
 		createView();
 	}
 	
+	/**
+	 * 
+	 * @param position
+	 * @param target
+	 * @param up
+	 * @return
+	 */
 	public Matrix lookAt(Vector3d position, Vector3d target, Vector3d up) {
 		
 		nForward = Vector3d.subtract(target,position);
@@ -126,6 +148,13 @@ public class Camera {
 	public Vector4d getProjection(Matrix mvm,Vector3d v3d) {
 		return getProjection(mvm, new Vector4d(v3d, 1));
 	}
+	
+	/**
+	 * 
+	 * @param mvm
+	 * @param v4d
+	 * @return
+	 */
 	public Vector4d getProjection(Matrix mvm, Vector4d v4d) {
 		
 		

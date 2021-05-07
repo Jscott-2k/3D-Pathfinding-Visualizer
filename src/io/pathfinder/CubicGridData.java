@@ -17,27 +17,41 @@ public class CubicGridData {
 		System.out.println("Loading CubicGridData...");
 
 		this.nodeArray = nodeArray;
+		boolean needBind = false;
+		if (this.nodeArray == null) {
+			this.nodeArray = new NodeArray(size);
+			needBind = true;
+		}
+
 		cubeGroups.clear();
 		cubeGroups.ensureCapacity(size * size * size);
 		for (int x = 0; x < size; x++) {
 			for (int y = 0; y < size; y++) {
 				for (int z = 0; z < size; z++) {
 					data[x][y][z] = new CubeNode((x * space) + center, center + (y * space), (z * space) + 50, x, y, z);
+					Node node = this.nodeArray.get(x, y, z);
 
-					if (nodeArray != null) {
-						Node node = data[x][y][z].getNode();
-						node.setType(nodeArray.get(x, y, z).getType());
-						nodeArray.setNeighbors(node);
+					if (node != null) {
+						NodeType type = this.nodeArray.get(x, y, z).getType();
+						if (type == null) {
+							node.setType(NodeType.EMPTY);
+						} else {
+							node.setType(type);
+						}
+						data[x][y][z].setNode(node);
+						this.nodeArray.setNeighbors(node);
 					}
-
 					cubeGroups.add(data[x][y][z]);
 				}
 			}
 		}
-
-		if (nodeArray == null) {
-			nodeArray = bindNodeArray();
+		if (needBind) {
+			this.nodeArray.bind(data);
 		}
+
+//		if (nodeArray == null) {
+//			nodeArray = bindNodeArray();
+//		}
 		System.out.println("DONE!");
 		return this;
 	}
@@ -46,11 +60,11 @@ public class CubicGridData {
 		return data;
 	}
 
-	public NodeArray bindNodeArray() {
-		System.out.println("Binding Node Array...");
-		this.nodeArray = new NodeArray(data);
-		return nodeArray;
-	}
+//	public NodeArray bindNodeArray() {
+//		System.out.println("Binding Node Array...");
+//		this.nodeArray = new NodeArray();
+//		return nodeArray;
+//	}
 
 	private ArrayList<Node> getNodeArrayList() {
 		return nodeArray.getAsArrayList();
@@ -65,8 +79,13 @@ public class CubicGridData {
 	}
 
 	public Node findFirstNode(NodeType type) {
-		for(Node n : getNodeArrayList()) {
-			if(n.getType() == type) {
+		for (Node n : getNodeArrayList()) {
+
+			if (n == null) {
+				break;
+			}
+
+			if (n.getType() == type) {
 				return n;
 			}
 		}

@@ -3,6 +3,10 @@ package io.pathfinder.astar;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import io.pathfinder.CubeNode;
+import io.pathfinder.CubicGrid;
+import io.pathfinder.Driver;
+
 public class Pathfinder {
 
 	private ArrayList<Node> open;
@@ -10,9 +14,13 @@ public class Pathfinder {
 	private HashMap<Node, Double> fScores;
 	private HashMap<Node, Double> gScores;
 
+	private CubicGrid grid;
+	private boolean running = false;
 	private Node start, end, current;
 	private boolean hasPath = false;
 
+	private int runMode = 0;
+	
 	public boolean hasPath() {
 		return hasPath;
 	}
@@ -31,7 +39,7 @@ public class Pathfinder {
 	}
 
 	private double g(Node n) {
-		
+
 		double g = gScores.get(n) + 1;
 		return g;
 	}
@@ -47,6 +55,10 @@ public class Pathfinder {
 
 		Node next = getLowestF();
 		this.current = next;
+
+		// Visual
+		CubeNode currentCN = grid.getCubeNode(current.getX(), current.getY(), current.getZ());
+		currentCN.setTraced(3);
 
 		if (this.current == end) {
 			System.out.println("Found End!");
@@ -68,7 +80,11 @@ public class Pathfinder {
 			if (neighbor.getType() == NodeType.OBSTACLE || closed.contains(neighbor)) {
 				continue;
 			}
-			
+
+			// Visual
+			CubeNode cubeNode = grid.getCubeNode(neighbor.getX(), neighbor.getY(), neighbor.getZ());
+			cubeNode.setNeighborTraced();
+
 			neighbor.setNext(current);
 			gScores.put(neighbor, g(current));
 			fScores.put(neighbor, f(neighbor));
@@ -76,7 +92,7 @@ public class Pathfinder {
 			if (!open.contains(neighbor)) {
 				open.add(neighbor);
 			}
-			
+
 		}
 
 		return false;
@@ -103,8 +119,15 @@ public class Pathfinder {
 		return resultNode;
 	}
 
-	public void run(ArrayList<Node> data, Node start, Node end) {
+	public void run(ArrayList<Node> data, Node start, Node end, CubicGrid grid, int runMode) {
 
+		if (start == null || end == null) {
+			System.out.println("Null start or end node. Cannot find path!");
+			return;
+		}
+
+		this.grid = grid;
+		this.runMode = runMode;
 		this.open = new ArrayList<Node>();
 		this.closed = new ArrayList<Node>();
 
@@ -124,27 +147,55 @@ public class Pathfinder {
 
 		hasPath = false;
 		System.out.println("Running Pathfinder: " + "\n\tStart: " + start + "\n\tEnd:" + end);
-		
-		while (!this.open.isEmpty()) {
-			hasPath = step();
-			if (hasPath) {
-				break;
+
+		if (runMode == 0) {
+
+			while (!this.open.isEmpty()) {
+				hasPath = step();
+				if (hasPath) {
+					break;
+				}
 			}
+		} else {
+			running = true;
 		}
 	}
 
+	public void update() {
+
+		if (this.open == null) {
+			return;
+		}
+
+		long currentFrameTick = Driver.getDriver().getScreen().getFrameTick();
+		if (running && !this.open.isEmpty() && !hasPath && currentFrameTick % 5 == 0) {
+			hasPath = step();
+		}
+		if (hasPath || this.open.isEmpty()) {
+			running = false;
+		}
+	}
+
+	public boolean isRunning() {
+		return running;
+	}
+
 	public ArrayList<Node> buildPath() {
-		
+
 		ArrayList<Node> path = new ArrayList<Node>();
-		
 		Node walker = end;
 		while (walker != null) {
-			System.out.println("Walking Path Node: " + walker.getLocationStr() + " - " + walker.getType());			
-			path.add(walker);
+			System.out.println("Walking Path Node: " + walker.getLocationStr() + " - " + walker.getType());
+			path.add(0, walker);
 			walker = walker.getNext();
 		}
 
 		System.out.println("Path Built!");
+		hasPath = false;
 		return path;
+	}
+
+	public int getRunMode() {
+		return this.runMode;
 	}
 }

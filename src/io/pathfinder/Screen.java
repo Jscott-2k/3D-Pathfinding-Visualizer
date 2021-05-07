@@ -26,14 +26,19 @@ import io.pathfinder.menu.CustomMenuBar;
 import io.pathfinder.input.InputHandler;
 import io.pathfinder.input.InputManager;
 
+/**
+ * 
+ * @author Justin Scott
+ *
+ */
 public class Screen extends Canvas implements Runnable {
 
 	private ScreenConfiguration screenConfiguration;
 
 	private boolean rendering = false;
 	private BufferStrategy bufferStrategy;
+	
 	private JFrame frame;
-
 	private Camera camera;
 
 	private Timer timerFrameDelay, timerSecond;
@@ -59,11 +64,12 @@ public class Screen extends Canvas implements Runnable {
 
 	private TextRenderer textRenderer;
 	private static final Font DEBUG_FONT = new Font("verdana", Font.BOLD, 16);
-
 	
 	private static Screen screen;
 	private Object lock;
 	private boolean update;
+	
+	private long frameTick = 0;
 	
 	private Screen(){}
 	
@@ -316,6 +322,7 @@ public class Screen extends Canvas implements Runnable {
 				if(update) {
 					update();
 					render();
+					frameTick++;
 				}
 				frames++;
 				timerFrameDelay.setBeginTime(sysTime);
@@ -324,6 +331,10 @@ public class Screen extends Canvas implements Runnable {
 		}
 	}
 
+	public long getFrameTick() {
+		return frameTick;
+	}
+	
 	private void updateFramesPerSecond(long currentSysTime) {
 		if (timerSecond.getDeltaTime() >= 1) {
 			actualFPS = frames;

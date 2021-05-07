@@ -9,7 +9,8 @@ import io.pathfinder.astar.NodeType;
 public class CubeNode {
 
 	private Mesh testCube1, testCube2, testCube3;
-	private boolean traced = false;
+	private int traced = 0;
+
 	private Node node;
 
 	public CubeNode(double x, double y, double z, int xUnit, int yUnit, int zUnit) {
@@ -34,12 +35,18 @@ public class CubeNode {
 
 			//testCube3.rotate(1, 1, 1);
 		}
+		
+		testCube3.setColor(node.getType().getColor());
+		
+		if (NodeType.EMPTY == node.getType() && traced == 2) {
+			testCube3.setColor(Color.ORANGE);
 
-		if (NodeType.EMPTY == node.getType() && traced) {
+		}else if(NodeType.EMPTY == node.getType() && traced == 3) {
+			testCube3.setColor(Color.CYAN);
+		}
+		else if (NodeType.EMPTY == node.getType() && traced == 1) {
 			testCube3.setColor(Color.BLUE);
-
-		} else {
-			testCube3.setColor(node.getType().getColor());
+			testCube3.rotate(1, 1, 1);
 		}
 	}
 
@@ -66,7 +73,16 @@ public class CubeNode {
 		return this.node;
 	}
 
-	public void setTraced(boolean traced) {
+	public void setNode(Node node) {
+		this.node = node;
+	}
+
+	public void setTraced(int traced) {
 		this.traced = traced;
+	}
+
+	public void setNeighborTraced() {
+		System.out.println("Traced Neighbor");
+		this.traced = 2;
 	}
 }

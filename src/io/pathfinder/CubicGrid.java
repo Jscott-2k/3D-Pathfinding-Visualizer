@@ -28,24 +28,34 @@ public class CubicGrid {
 	private ArrayList<CubeNode> cubeGroups; // Useful for sorting
 	private CubicGridData cubeGridData; // Useful for searching
 
+	private ArrayList<Node> path;
+	private int pathIndex = 0;
+
 	private SquareGrid[] squareGrids;
 	private int size = 0;
 	private Pathfinder pathfinder;
+	private boolean buildingPath = false;
+	private boolean canUpdate = true;
+	private boolean searchingPath = false;
 
 	public CubicGrid(int size, int space, Canvas canvas) {
 		this.size = size;
 		double center = ((size - 1) * -space) / 2;
 
-		squareGrids = new SquareGrid[size];
 		cubeGroups = new ArrayList<CubeNode>();
 		cubeGridData = new CubicGridData();
 		cubeGridData.load(size, space, center, cubeGroups, null);
+		loadCubeNodesArrayList();
+		initSquareGrid(canvas, cubeGridData);
 
+		this.pathfinder = new Pathfinder();
+	}
+
+	private void initSquareGrid(Canvas canvas) {
+		squareGrids = new SquareGrid[size];
 		for (int y = 0; y < size; y++) {
 			squareGrids[y] = new SquareGrid(y, size, canvas.getWidth(), canvas.getHeight(), this);
 		}
-
-		this.pathfinder = new Pathfinder();
 	}
 
 	public void loadCubeNodesArrayList() {
@@ -72,8 +82,21 @@ public class CubicGrid {
 	}
 
 	public void update() {
+
+		if (pathfinder.getRunMode() == 1) {
+			pathfinder.update();
+
+			if (!pathfinder.isRunning()) {
+				onPathfindEnd();
+			}
+		}
+
 		for (CubeNode cubeGroup : cubeGroups) {
 			cubeGroup.update();
+		}
+		if (buildingPath) {
+			System.out.println("Building Path..");
+			updatePathBuildAnimation();
 		}
 		sortCubes();
 	}
@@ -130,7 +153,23 @@ public class CubicGrid {
 
 		loadCubeNodesArrayList();
 
+		initSquareGrid(Driver.getDriver().getScreen(), cubeGridData);
+
 		return this;
+	}
+
+	private void initSquareGrid(Canvas canvas, CubicGridData cubeGridData) {
+		initSquareGrid(canvas);
+
+		for (int y = 0; y <= size - 1; y++) {
+			SquareGrid grid = squareGrids[y];
+			for (int x = 0; x <= size - 1; x++) {
+				for (int z = 0; z <= size - 1; z++) {
+					grid.setSquareNode(x, z, cubeGridData.getData()[x][y][z].getNode());
+				}
+			}
+		}
+
 	}
 
 	public Node getStart() {
@@ -141,18 +180,73 @@ public class CubicGrid {
 		return cubeGridData.findFirstNode(NodeType.END);
 	}
 
-	public void findPath() {
+	public void updatePathBuildAnimation() {
 
-		pathfinder.run(this.cubeGridData.getNodeArray().getAsArrayList(), getStart(), getEnd());
+		if (buildingPath) {
+			long currentFrameTick = Driver.getDriver().getScreen().getFrameTick();
+			if (currentFrameTick % 10 == 0) {
+				pathIndex++;
+			}
+			Node pathNode = path.get(pathIndex);
+			getCubeNode(pathNode.getX(), pathNode.getY(), pathNode.getZ()).setTraced(1);
+			if (pathIndex >= path.size() - 1) {
+				pathIndex = 0;
+				buildingPath = false;
+			}
+		}
+	}
+
+	private void buildPath() {
 		if (pathfinder.hasPath()) {
 			System.out.println("Found Path! Reconstructing...");
-			pathfinder.buildPath().forEach(n -> {
-				getCubeNode(n.getX(), n.getY(), n.getZ()).setTraced(true);
-			});
+			path = pathfinder.buildPath();
+
+			pathIndex = 0;
+			buildingPath = true;
+			//path.forEach(n ->{
+			//getCubeNode(n.getX(), n.getY(), n.getZ()).setTraced(true);
+			//});
 
 		} else {
 			System.out.println("No Path!");
 		}
+	}
+
+	private void onPathfindEnd() {
+
+		if (searchingPath) {
+
+			buildPath();
+
+		}
+		searchingPath = false;
+	}
+
+	public void findPath(int RUN_MODE) {
+		cubeGroups.forEach(n -> {
+			n.setTraced(0);
+		});
+		searchingPath = true;
+		pathfinder.run(this.cubeGridData.getNodeArray().getAsArrayList(), getStart(), getEnd(), this, RUN_MODE);
+		
+		if(pathfinder.getRunMode()==0) {
+			onPathfindEnd();
+		}
+	}
+
+	public void reset() {
+
+		Driver.getDriver().getScreen().setUpdate(false);
+		cubeGroups = new ArrayList<CubeNode>();
+		cubeGridData = new CubicGridData();
+
+		int space = 12;
+		double center = ((size - 1) * -space) / 2;
+
+		cubeGridData.load(size, space, center, cubeGroups, null);
+		loadCubeNodesArrayList();
+		initSquareGrid(Driver.getDriver().getScreen(), cubeGridData);
+		Driver.getDriver().getScreen().setUpdate(true);
 	}
 
 }

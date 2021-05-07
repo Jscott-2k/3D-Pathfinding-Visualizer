@@ -4,6 +4,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 
+import io.pathfinder.astar.Node;
 import io.pathfinder.astar.NodeType;
 
 public class SquareGrid {
@@ -12,19 +13,18 @@ public class SquareGrid {
 	private int size;
 	private int hoveredX = 0, hoveredZ = 0;
 	private Square[][] squares;
-	private CubicGrid cubicGrid;
+	//private CubicGrid cubicGrid;
 
 	public SquareGrid(int y, int size, int canvasWidth, int canvasHeight, CubicGrid cubicGrid) {
 
 		this.y = y;
 		this.size = size;
 		this.squares = new Square[size][size];
-		this.cubicGrid = cubicGrid;
+		//this.cubicGrid = cubicGrid;
 
 		for (int x = 0; x < size; x++) {
 			for (int z = 0; z < size; z++) {
 				squares[x][z] = new Square(x, z, size, canvasWidth, canvasHeight, cubicGrid.getCubeNode(x, y, z));
-
 			}
 		}
 	}
@@ -86,9 +86,9 @@ public class SquareGrid {
 
 	public void render(Graphics2D g) {
 		for (int x = 0; x < size; x++) {
-			for (int y = 0; y < size; y++) {
+			for (int z = 0; z < size; z++) {
 
-				Square square = squares[x][y];
+				Square square = squares[x][z];
 				square.render(g);
 			}
 		}
@@ -97,4 +97,8 @@ public class SquareGrid {
 
 	}
 
+	public void setSquareNode(int x, int z, Node node) {
+		squares[x][z].setNode(node);
+		squares[x][z].setNodeType(node.getType());
+	}
 }

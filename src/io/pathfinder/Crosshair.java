@@ -90,6 +90,12 @@ public class Crosshair {
 		graphics.drawLine(centerX, centerY - size, centerX, centerY + size);
 	}
 
+	/**
+	 * 
+	 * @param screenCenterX
+	 * @param screenCenterY
+	 * @param camera
+	 */
 	public void update(int screenCenterX, int screenCenterY, Camera camera) {
 
 		if (!enabled) {
