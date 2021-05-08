@@ -3,12 +3,22 @@ package io.pathfinder.input;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * Stores an InputManager object and handles the user input with the handle method.
+ * 
+ * 
+ * 
+ * @author Justin Scott
+ *
+ */
 public class InputHandler{
 	
 	private InputManager manager;
 	
 	private HashMap<Integer, KeyInputEvent> keyEventMap;
-	private ArrayList<Integer> resetKeyState;
+	
+	
+	private ArrayList<Integer> resetKeyState; // For storing which keys have already been handled and need there state to be set to NONE
 	
 	public InputHandler() {
 		manager = new InputManager();

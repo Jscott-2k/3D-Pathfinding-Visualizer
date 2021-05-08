@@ -49,7 +49,7 @@ public class Vector2d extends Vector{
 	public Vector2d add(Vector2d other) {
 		this.x += other.getX();
 		this.y += other.getY();
-		
 		return new Vector2d(x, y);
 	}
+
 }

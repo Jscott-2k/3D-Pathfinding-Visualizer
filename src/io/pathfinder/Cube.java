@@ -5,7 +5,7 @@ import java.awt.Color;
 import io.pathfinder.math.Vector3d;
 
 /**
- * 6 Polygons 8 Points
+ * Mesh of 6 Polygons 8 unique Points
  * 
  * @author Justin Scott
  *
@@ -33,6 +33,9 @@ public class Cube extends Mesh {
 		Vector3d v6 = new Vector3d(halfSize, -halfSize, halfSize);
 		Vector3d v7 = new Vector3d(-halfSize,-halfSize, halfSize);
 
+		// NOTE!! Order of triangles is extremely important for surface normals to be calculated correctly! 
+		// Uses a left to right triangle wrapping for meshes. Reference image for how this works would be helpful
+		// Wrapping should be consistent throughout all meshes
 		super.addTriangles(
 				//SOUTH FACE
 				new Triangle(colors[0], v0, v2, v1),

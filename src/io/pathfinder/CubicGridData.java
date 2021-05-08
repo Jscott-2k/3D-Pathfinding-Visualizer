@@ -6,6 +6,12 @@ import io.pathfinder.astar.Node;
 import io.pathfinder.astar.NodeArray;
 import io.pathfinder.astar.NodeType;
 
+/**
+ * Stores and manages data for a CubicGrid
+ *
+ * @author Justin Scott
+ *
+ */
 public class CubicGridData {
 
 	private CubeNode[][][] data;

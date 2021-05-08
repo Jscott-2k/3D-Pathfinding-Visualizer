@@ -10,6 +10,18 @@ import io.pathfinder.math.Matrix;
 import io.pathfinder.math.Vector3d;
 import io.pathfinder.math.Vector4d;
 
+
+/**
+ * A Mesh consists of a group of triangles which form a 3D object.
+ * The mesh is responsible for managing the triangles
+ * 
+ * Can render triangles and perform various transformation with them.
+ * 
+ * Currently applies single Color for all the triangles.
+ * 
+ * @author Justin Scott
+ *
+ */
 public class Mesh {
 	
 	private ArrayList<Triangle> triangles;
@@ -107,6 +119,10 @@ public class Mesh {
 		for(Triangle tri : triangles) {
 			tri.setColor(color);
 		}
+	}
+
+	public void setDefaultRotation() {
+		transform.setRotation(0,0,0);
 	}
 
 }

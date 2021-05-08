@@ -11,6 +11,9 @@ import io.pathfinder.math.Vector3d;
 import io.pathfinder.math.Vector4d;
 
 /**
+ * A camera responsible for converting points to a 3D space to coordinates which can be displayed on the screen
+ * Contains a transform object allowing it to act as an object in 3D space which can move around and rotate
+ * There are 3 matrices fields that are used to calculate the displayed coordinates. (Projection, Camera, and View Matrix)
  * 
  * @author Justin Scott
  *
@@ -39,6 +42,8 @@ public class Camera {
 	private boolean splitScreen = false;
 	private int splitScreenXMod = 1;
 	
+	private double sensitivity = 5;
+		
 	public Camera(double moveSpeed, double near, double far, double fieldOfView, ScreenConfiguration screenConfiguration) {
 		transform = new Transform();
 		this.moveSpeed = moveSpeed;
@@ -49,7 +54,7 @@ public class Camera {
 	}
 
 	/**
-	 * 
+	 * Initializes the camera for the perspective projection and creates the projection matrix 
 	 * @param near
 	 * @param far
 	 * @param fieldOfView
@@ -69,7 +74,7 @@ public class Camera {
 	}
 	
 	/**
-	 * 
+	 * Adjust projection matrix for splitscreen.
 	 * @param splitScreen
 	 */
 	public void setSplitScreen(boolean splitScreen) {
@@ -83,7 +88,7 @@ public class Camera {
 	}
 	
 	/**
-	 * 
+	 * Creates the look at matrix and calculates the forward vector of the camera given a target and up vector.
 	 * @param position
 	 * @param target
 	 * @param up
@@ -96,6 +101,7 @@ public class Camera {
 		nUp = nRight.cross(nForward);
 		
 		vForward = nForward.copy();
+		
 		nForward.normalize();
 		nUp.normalize();
 		nRight.normalize();
@@ -124,6 +130,10 @@ public class Camera {
 		
 	}
 
+	/**
+	 * Create the camera view matrix using the inverse of the lookAt (camera) matrix
+	 * @return
+	 */
 	public Matrix createView() {
 		
 	
@@ -150,7 +160,7 @@ public class Camera {
 	}
 	
 	/**
-	 * 
+	 * Gets the projected x,y,z of a point given the model view matrix. 
 	 * @param mvm
 	 * @param v4d
 	 * @return
@@ -171,7 +181,8 @@ public class Camera {
 			x /= w;
 			y /= w;
 		}
-
+		
+		// Scale normalized points back up
 		x *= (double) screenConfiguration.getWidth() / (2.0 * splitScreenXMod);
 		y *= (double) screenConfiguration.getHeight() / 2.0;
 		
@@ -264,20 +275,6 @@ public class Camera {
 			}
 		});
 		
-		inputHandler.addEvent(new KeyInputEvent(KeyEvent.VK_A) {
-			@Override
-			public void onKeyDown() {
-				Vector3d f = Vector3d.multiply(nRight, -moveSpeed);
-				transform.translate(f);
-				
-			}
-
-			@Override
-			public void onKeyRelease() {
-				// TODO Auto-generated method stub
-				
-			}
-		});
 		
 		inputHandler.addEvent(new KeyInputEvent(KeyEvent.VK_D) {
 			@Override
@@ -301,7 +298,7 @@ public class Camera {
 	}
 
 	public void rotateByMouse(double dx, double dy) {
-		transform.rotateByDegree(dy / 5.0, dx / 5.0, 0);
+		transform.rotateByDegree(dy / sensitivity, dx / sensitivity, 0);
 	}
 
 	public Matrix getProjectionMatrix() {

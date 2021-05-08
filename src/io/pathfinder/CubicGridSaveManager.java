@@ -56,7 +56,6 @@ public class CubicGridSaveManager {
 	public boolean load(File file) throws Exception {
 		
 		Driver.getDriver().getScreen().setUpdate(false);
-		
 	
 		System.out.println("\tOPENING FILE: " + file.getName());
 
@@ -64,7 +63,6 @@ public class CubicGridSaveManager {
 		ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
 		this.cubicGrid = this.cubicGrid.loadFromSave(objectInputStream);
 		
-		Driver.getDriver().getScreen().setUpdate(true);
 		
 		return this.cubicGrid != null;
 		

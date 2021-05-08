@@ -1,5 +1,10 @@
 package io.pathfinder;
 
+/**
+ * Singleton data class which stores information regarding the display.
+ * @author Justin Scott
+ *
+ */
 public class ScreenConfiguration {
 	
 	private int width;

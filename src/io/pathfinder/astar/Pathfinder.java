@@ -7,6 +7,13 @@ import io.pathfinder.CubeNode;
 import io.pathfinder.CubicGrid;
 import io.pathfinder.Driver;
 
+/**
+ * 
+ * Pathfinder for Node objects using A* search algorithm with Manhattan distance heuristic.
+ * 
+ * @author Justin Scott
+ *
+ */
 public class Pathfinder {
 
 	private ArrayList<Node> open;
@@ -20,7 +27,7 @@ public class Pathfinder {
 	private boolean hasPath = false;
 
 	private int runMode = 0;
-	
+
 	public boolean hasPath() {
 		return hasPath;
 	}
@@ -51,14 +58,26 @@ public class Pathfinder {
 		return Math.abs(b.getX() - a.getX()) + Math.abs(b.getY() - a.getY()) + Math.abs(b.getZ() - a.getZ());
 	}
 
+	/**
+	 * Called for each step of the A* algorithm. First finds node in the open set
+	 * with the lowest F score (estimated lowest distance), this is the 'current'
+	 * node Neighbors of the current node are then added to the open set, and their
+	 * f and g score are calculated
+	 * 
+	 * @return
+	 */
 	private boolean step() {
 
+		
+		CubeNode currentCN = grid.getCubeNode(current.getX(), current.getY(), current.getZ());
+		currentCN.setTraced(3);
+		
 		Node next = getLowestF();
 		this.current = next;
 
-		// Visual
-		CubeNode currentCN = grid.getCubeNode(current.getX(), current.getY(), current.getZ());
-		currentCN.setTraced(3);
+		// Visualization for current node
+		currentCN = grid.getCubeNode(current.getX(), current.getY(), current.getZ());
+		currentCN.setTraced(4);
 
 		if (this.current == end) {
 			System.out.println("Found End!");
@@ -77,22 +96,22 @@ public class Pathfinder {
 			}
 			System.out.println("\tNeighbor:" + neighbor.getLocationStr());
 
+			// Ignore neighbor if it cannot be traversed
 			if (neighbor.getType() == NodeType.OBSTACLE || closed.contains(neighbor)) {
 				continue;
 			}
 
-			// Visual
+			// Visualization for neighbors
 			CubeNode cubeNode = grid.getCubeNode(neighbor.getX(), neighbor.getY(), neighbor.getZ());
 			cubeNode.setNeighborTraced();
-
 			neighbor.setNext(current);
+
 			gScores.put(neighbor, g(current));
 			fScores.put(neighbor, f(neighbor));
 
 			if (!open.contains(neighbor)) {
 				open.add(neighbor);
 			}
-
 		}
 
 		return false;
@@ -119,6 +138,16 @@ public class Pathfinder {
 		return resultNode;
 	}
 
+	/**
+	 * The start point for the A* pathfinding algorithm. 
+	 * 
+	 * 
+	 * @param data - All the nodes of some network to be considered by the pathfinder
+	 * @param start - Node where A* begins
+	 * @param end - Node were A* search attempts to traverse too
+	 * @param grid - 
+	 * @param runMode
+	 */
 	public void run(ArrayList<Node> data, Node start, Node end, CubicGrid grid, int runMode) {
 
 		if (start == null || end == null) {
@@ -161,6 +190,10 @@ public class Pathfinder {
 		}
 	}
 
+	/**
+	 * Every 5 frames continues next step of pathfinding A* algorithm 
+	 * Requires that the pathfinder is running in runMode 1 and is still running
+	 */
 	public void update() {
 
 		if (this.open == null) {
@@ -180,6 +213,12 @@ public class Pathfinder {
 		return running;
 	}
 
+	/**
+	 * Fills a path ArrayList which stores all the nodes that are linked together in
+	 * the a* search
+	 * 
+	 * @return
+	 */
 	public ArrayList<Node> buildPath() {
 
 		ArrayList<Node> path = new ArrayList<Node>();

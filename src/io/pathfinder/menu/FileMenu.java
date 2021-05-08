@@ -19,6 +19,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import io.pathfinder.CubicGridSaveManager;
+import io.pathfinder.Driver;
 
 public class FileMenu extends JMenu {
 
@@ -81,7 +82,7 @@ public class FileMenu extends JMenu {
 					if (file == null) {
 						throw new NullPointerException();
 					}
-
+					
 					if (CubicGridSaveManager.getCubicGridSaver().load(file)) {
 						System.out.println("\tLOADED SAVE!");
 					}
@@ -90,6 +91,7 @@ public class FileMenu extends JMenu {
 					e.printStackTrace();
 					System.out.println("\tFAILED TO LOAD SAVE!");
 				}
+				Driver.getDriver().getScreen().setUpdate(true);
 
 			}
 		});

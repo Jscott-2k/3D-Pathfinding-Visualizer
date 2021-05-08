@@ -7,12 +7,18 @@ import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 
 import io.pathfinder.astar.Node;
 import io.pathfinder.astar.NodeArray;
 import io.pathfinder.astar.NodeType;
 import io.pathfinder.astar.Pathfinder;
 
+/**
+ * Class for encapsulating the entire cubic grid of CubeNodes
+ * @author Justin Scott
+ *
+ */
 public class CubicGrid {
 
 	/**
@@ -25,7 +31,7 @@ public class CubicGrid {
 	 * cube node and both are updated accordingly.
 	 */
 
-	private ArrayList<CubeNode> cubeGroups; // Useful for sorting
+	private ArrayList<CubeNode> cubeNodes; // Useful for sorting
 	private CubicGridData cubeGridData; // Useful for searching
 
 	private ArrayList<Node> path;
@@ -42,9 +48,9 @@ public class CubicGrid {
 		this.size = size;
 		double center = ((size - 1) * -space) / 2;
 
-		cubeGroups = new ArrayList<CubeNode>();
+		cubeNodes = new ArrayList<CubeNode>();
 		cubeGridData = new CubicGridData();
-		cubeGridData.load(size, space, center, cubeGroups, null);
+		cubeGridData.load(size, space, center, cubeNodes, null);
 		loadCubeNodesArrayList();
 		initSquareGrid(canvas, cubeGridData);
 
@@ -59,8 +65,8 @@ public class CubicGrid {
 	}
 
 	public void loadCubeNodesArrayList() {
-		cubeGroups.clear();
-		cubeGroups.ensureCapacity(size * size * size);
+		cubeNodes.clear();
+		cubeNodes.ensureCapacity(size * size * size);
 
 		System.out.println("Loading Cubes Nodes Array List: ");
 		System.out.print("\t");
@@ -69,7 +75,7 @@ public class CubicGrid {
 				System.out.print("*");
 				for (int k = 0; k <= size - 1; k++) {
 
-					cubeGroups.add(cubeGridData.getData()[i][j][k]);
+					cubeNodes.add(cubeGridData.getData()[i][j][k]);
 				}
 			}
 			System.out.print("\n\t");
@@ -85,25 +91,27 @@ public class CubicGrid {
 
 		if (pathfinder.getRunMode() == 1) {
 			pathfinder.update();
-
 			if (!pathfinder.isRunning()) {
 				onPathfindEnd();
 			}
 		}
-
-		for (CubeNode cubeGroup : cubeGroups) {
+		for (CubeNode cubeGroup : cubeNodes) {
 			cubeGroup.update();
 		}
 		if (buildingPath) {
-			System.out.println("Building Path..");
+			
 			updatePathBuildAnimation();
 		}
 		sortCubes();
 	}
 
 	public void render(Graphics graphics, Camera camera) {
-		for (CubeNode cubeGroup : cubeGroups) {
-			cubeGroup.render(graphics, camera);
+		try {
+			for (CubeNode cubeGroup : cubeNodes) {
+				cubeGroup.render(graphics, camera);
+			}
+		} catch (ConcurrentModificationException e) { //Occasional crash without try/catch :( Need better solution but works for time being
+			e.printStackTrace();
 		}
 	}
 
@@ -118,7 +126,7 @@ public class CubicGrid {
 	}
 
 	public ArrayList<CubeNode> sortCubes() {
-		Collections.sort(cubeGroups, new Comparator<CubeNode>() {
+		Collections.sort(cubeNodes, new Comparator<CubeNode>() {
 			@Override
 			public int compare(CubeNode cg1, CubeNode cg2) {
 
@@ -131,7 +139,7 @@ public class CubicGrid {
 				return diff < 0 ? 1 : -1;
 			}
 		});
-		return cubeGroups;
+		return cubeNodes;
 	}
 
 	public CubicGridData getData() {
@@ -147,7 +155,7 @@ public class CubicGrid {
 		this.size = loadedNodeArray.getSize();
 		double center = ((size - 1) * -space) / 2;
 
-		this.cubeGridData = cubeGridData.load(size, space, center, cubeGroups, loadedNodeArray);
+		this.cubeGridData = cubeGridData.load(size, space, center, cubeNodes, loadedNodeArray);
 
 		Driver.getDriver().getScreen().setGridSize(size);
 
@@ -180,15 +188,25 @@ public class CubicGrid {
 		return cubeGridData.findFirstNode(NodeType.END);
 	}
 
+	
+	/**
+	 * Every 10 frames the next node in the path is traced. Uses pathIndex and buildingPath field.
+	 * 
+	 * pathIndex tells which node is next to be traced
+	 */
 	public void updatePathBuildAnimation() {
 
 		if (buildingPath) {
 			long currentFrameTick = Driver.getDriver().getScreen().getFrameTick();
 			if (currentFrameTick % 10 == 0) {
+
 				pathIndex++;
+				Node pathNode = path.get(pathIndex);
+				double progress = (pathIndex/ (double) (path.size()-1)  ) * 100.0;
+				System.out.println("Building Path... " +progress + "% node - " + pathNode.getLocationStr());
+				getCubeNode(pathNode.getX(), pathNode.getY(), pathNode.getZ()).setTraced(1);
 			}
-			Node pathNode = path.get(pathIndex);
-			getCubeNode(pathNode.getX(), pathNode.getY(), pathNode.getZ()).setTraced(1);
+			
 			if (pathIndex >= path.size() - 1) {
 				pathIndex = 0;
 				buildingPath = false;
@@ -203,9 +221,9 @@ public class CubicGrid {
 
 			pathIndex = 0;
 			buildingPath = true;
-			//path.forEach(n ->{
-			//getCubeNode(n.getX(), n.getY(), n.getZ()).setTraced(true);
-			//});
+			// path.forEach(n ->{
+			// getCubeNode(n.getX(), n.getY(), n.getZ()).setTraced(true);
+			// });
 
 		} else {
 			System.out.println("No Path!");
@@ -213,23 +231,30 @@ public class CubicGrid {
 	}
 
 	private void onPathfindEnd() {
-
 		if (searchingPath) {
-
-			buildPath();
-
+			buildPath(); 
 		}
 		searchingPath = false;
 	}
 
+	
+	/**
+	 * Executes pathfinder run method and searches for path 
+	 * 3 possible run modes. Skip = 0, Step = 1, Step on key = 2.
+	 * 
+	 * Skip mode attempts to execute all steps of the pathfinder in 1 single frame, whereas step does one step per n frames. 
+	 * 
+	 * Step on key is not implemented yet
+	 * @param RUN_MODE
+	 */
 	public void findPath(int RUN_MODE) {
-		cubeGroups.forEach(n -> {
+		cubeNodes.forEach(n -> {
 			n.setTraced(0);
 		});
 		searchingPath = true;
 		pathfinder.run(this.cubeGridData.getNodeArray().getAsArrayList(), getStart(), getEnd(), this, RUN_MODE);
-		
-		if(pathfinder.getRunMode()==0) {
+
+		if (pathfinder.getRunMode() == 0) { // If skip mode, search would be over at this point so  we call onPathfindEnd
 			onPathfindEnd();
 		}
 	}
@@ -237,13 +262,13 @@ public class CubicGrid {
 	public void reset() {
 
 		Driver.getDriver().getScreen().setUpdate(false);
-		cubeGroups = new ArrayList<CubeNode>();
+		cubeNodes = new ArrayList<CubeNode>();
 		cubeGridData = new CubicGridData();
 
 		int space = 12;
 		double center = ((size - 1) * -space) / 2;
 
-		cubeGridData.load(size, space, center, cubeGroups, null);
+		cubeGridData.load(size, space, center, cubeNodes, null);
 		loadCubeNodesArrayList();
 		initSquareGrid(Driver.getDriver().getScreen(), cubeGridData);
 		Driver.getDriver().getScreen().setUpdate(true);

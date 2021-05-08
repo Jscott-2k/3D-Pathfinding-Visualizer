@@ -1,5 +1,12 @@
 package io.pathfinder.math;
 
+/**
+ * Data class for a n x m Matrix. 
+ * Able to multiply with other matrices or vectors, and perform other matrix operations.
+ *
+ * @author Justin Scott
+ *
+ */
 public class Matrix {
 
 	private int rows, columns = 0;
@@ -29,6 +36,14 @@ public class Matrix {
 		return matrix1.multiplyMatrix(matrix2);
 	}
 
+	
+	
+	/**
+	 * Multiplies two matrices by summing the product of the rows
+	 * Returns a resulting matrix
+	 * @param pMatrix
+	 * @return
+	 */
 	public Matrix multiplyMatrix(Matrix pMatrix) {
 
 		if (columns != pMatrix.getRows()) {
@@ -95,6 +110,13 @@ public class Matrix {
 		return rows == columns;
 	}
 
+	/**
+	 * Calculates the cofactor matrix and uses a given tempMatrix as output
+	 * @param tempMatrix
+	 * @param pRow
+	 * @param pColumn
+	 * @param rSize
+	 */
 	private void getCofactor(Matrix tempMatrix, int pRow, int pColumn, int rSize) {
 
 		int i = 0, j = 0;
@@ -134,6 +156,13 @@ public class Matrix {
 	}
 	
 
+	/**
+	 * Recursively calculates determinant of given square matrix
+	 * 
+	 * @param matrix
+	 * @param order
+	 * @return
+	 */
 	private double determinant(Matrix matrix, int order) {
 
 		//Cannot compute non-square matrix. Sanity check.
@@ -161,7 +190,10 @@ public class Matrix {
 		return determinant;
 	}
 
-	
+	/**
+	 * The transpose of the cofactor matrix
+	 * @return
+	 */
 	public Matrix getAdjoint() {
 		
 		final int order = getOrder();
@@ -193,6 +225,13 @@ public class Matrix {
 		return resultMatrix.getTranspose();
 	} 
 	
+	/**
+	 * Calculates the inverse of the matrix by taking the adjoint, transpose, and dividing by the determinant.
+	 * Note there are faster ways for calculating the inverse for square matrices of specific sizes,
+	 * however this method will work for any square matrix
+	 * 
+	 * @return
+	 */
 	public Matrix getInverse() {
 		
 		double det = determinant();
@@ -201,6 +240,11 @@ public class Matrix {
 		
 	}
 	
+	/**
+	 * Multiply all values by some value a in the matrix
+	 * @param a
+	 * @return
+	 */
 	public Matrix multiply(double a) {
 		Matrix resultMatrix = new Matrix(rows, columns);
 		
@@ -214,6 +258,11 @@ public class Matrix {
 		return resultMatrix;
 	}
 	
+	/**
+	 * Divide all values by some value a in the matrix
+	 * @param a
+	 * @return
+	 */
 	public Matrix divide(double a) {
 		Matrix resultMatrix = new Matrix(rows, columns);
 		
@@ -227,6 +276,10 @@ public class Matrix {
 		return resultMatrix;
 	}
 	
+	/**
+	 * Rotates a matrix. Turns all of the rows into columns and all columns into rows
+	 * @return
+	 */
 	public Matrix getTranspose() {
 		Matrix resultMatrix = new Matrix(columns, rows);
 		for(int row=0;row<rows;row++) {
@@ -236,7 +289,6 @@ public class Matrix {
 		}
 		return resultMatrix;
 	}
-	
 	
 	@Override
 	public String toString() {
@@ -250,18 +302,24 @@ public class Matrix {
 		return str;
 	}
 	
+	/**
+	 * Checks equality of matrices by contained values in the 2D matrix array
+	 */
 	@Override
 	public boolean equals(Object matrix) {
 		
+		// Ensure the passed in matrix is a Matrix type
 		if(! (matrix instanceof Matrix) ) {
 			return false;
 		}
 		Matrix castedMatrix = (Matrix) matrix;
 	
+		// Make sure it is same dimension
 		if(!isDimension(castedMatrix.getRows(), castedMatrix.getColumns())) {
 			return false;
 		}
 		
+		// Lastly check to see if all the values are the same
 		for(int fi=0;fi<rows;fi++) {
 			for(int fj=0;fj<columns;fj++) {
 				if(castedMatrix.get(fi, fj) != get(fi, fj)) {

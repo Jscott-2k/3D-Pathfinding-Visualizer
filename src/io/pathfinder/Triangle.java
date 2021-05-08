@@ -11,6 +11,15 @@ import io.pathfinder.math.Vector2d;
 import io.pathfinder.math.Vector3d;
 import io.pathfinder.math.Vector4d;
 
+/**
+ * Triangle to be projected onto the screen and rendered
+ * 
+ * Stores and manages vertices or the points of the triangle
+ * 
+ * 
+ * @author Justin Scott
+ *
+ */
 public class Triangle {
 
 	private Vector3d[] verticies;
@@ -28,6 +37,10 @@ public class Triangle {
 		this.verticies[2] = v3.copy();
 	}
 
+	/**
+	 * Used for sorting Triangles in correct render order. Estimated projected Z value of the triangle
+	 * @return
+	 */
 	public double getAverageZ() {
 		double sum = 0;
 
@@ -52,7 +65,16 @@ public class Triangle {
 		g.fillPolygon(p);
 	}
 
-	Polygon render(Graphics g, Camera camera, Matrix meshViewMatrix, Matrix meshTransformedMatrix) {
+	
+	/**
+	 * Main render method for triangle which generates a java AWT Polygon using projected vertices
+	 * @param g
+	 * @param camera
+	 * @param meshViewMatrix
+	 * @param meshTransformedMatrix
+	 * @return
+	 */
+	private Polygon render(Graphics g, Camera camera, Matrix meshViewMatrix, Matrix meshTransformedMatrix) {
 
 		Polygon polygon = new Polygon();
 		g.setColor(color);
@@ -72,9 +94,9 @@ public class Triangle {
 			if ((int) vProjected.getX() > camera.getScreenConfiguration().getWidth()
 					|| (int) vProjected.getX() < splitScreenCutoff
 					|| (int) vProjected.getY() > camera.getScreenConfiguration().getHeight()
-					|| (int) vProjected.getY() < 0) {
+					|| (int) vProjected.getY() < 0) { //Check if point is clipped by edges of screen
 				return EMPTY_POLY;
-			} else if (vProjected.getZ() < camera.getNear() || vProjected.getZ() > camera.getFar()) {
+			} else if (vProjected.getZ() < camera.getNear() || vProjected.getZ() > camera.getFar()) { // Check if point is clipped by near plane or far plane
 				return EMPTY_POLY;
 			}
 			polygon.addPoint((int) vProjected.getX(), (int) vProjected.getY());
@@ -89,6 +111,11 @@ public class Triangle {
 		return polygon;
 	}
 
+	/**
+	 * Possibly used for future back-face culling or for lighting, or physics etc..
+	 * @param meshTransformedVertices
+	 * @return
+	 */
 	public Vector3d getSurfaceNormal(Vector3d[] meshTransformedVertices) {
 
 		Vector3d p = Vector3d.subtract(meshTransformedVertices[0], meshTransformedVertices[1]);

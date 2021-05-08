@@ -1,5 +1,14 @@
 package io.pathfinder.math;
 
+
+
+/**
+ * 
+ * Completely static class for constructing useful matrices for 3D applications
+ * 
+ * @author Justin Scott
+ *
+ */
 final public class MatrixBuilder {
 	
 	private MatrixBuilder() {}

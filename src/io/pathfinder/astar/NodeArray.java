@@ -4,6 +4,12 @@ import java.util.ArrayList;
 
 import io.pathfinder.CubeNode;
 
+/**
+ * Serializable class containing save for cubic grid node data. To be stored in .p3dv file. 
+ * 
+ * @author Justin Scott
+ *
+ */
 public class NodeArray implements java.io.Serializable {
 
 	private static final long serialVersionUID = 4479787027341967227L;

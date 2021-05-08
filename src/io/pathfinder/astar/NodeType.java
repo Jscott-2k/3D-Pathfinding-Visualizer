@@ -2,6 +2,15 @@ package io.pathfinder.astar;
 
 import java.awt.Color;
 
+
+/**
+ * Stores static instances of the types of Nodes. 
+ * There are 4 types: START, EMPTY, OBSTACLE, and END.
+ * Each have distinct colors
+ * 
+ * @author Justin Scott
+ *
+ */
 public enum NodeType implements java.io.Serializable{
 	START(Color.GREEN),
 	EMPTY(Color.WHITE),
@@ -18,6 +27,12 @@ public enum NodeType implements java.io.Serializable{
 	public Color getColor() {
 		return color;
 	}
+	
+	/**
+	 * Get the next NodeType in the enum values() array of NodeTypes given the type passed in
+	 * @param current
+	 * @return
+	 */
 	public static NodeType getNextType(NodeType current) {
 		int nextIndex = (current.ordinal() + 1); 
 		nextIndex = nextIndex > NodeType.values().length - 1 ? 0 : nextIndex;
@@ -26,6 +41,11 @@ public enum NodeType implements java.io.Serializable{
 		return NodeType.values()[nextIndex];
 	}
 	
+	/**
+	 * Get the previous NodeType in the enum values() array of NodeTypes given the type passed in
+	 * @param current
+	 * @return
+	 */
 	public static NodeType getPreviousType(NodeType current) {
 		int nextIndex = (current.ordinal() - 1); 
 		nextIndex = nextIndex < 0 ? NodeType.values().length - 1 : nextIndex;

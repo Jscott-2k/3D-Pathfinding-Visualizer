@@ -6,9 +6,15 @@ import java.awt.Graphics;
 import io.pathfinder.astar.Node;
 import io.pathfinder.astar.NodeType;
 
+
+/**
+ * Mesh representation of a Node. 
+ * @author Justin Scott
+ *
+ */
 public class CubeNode {
 
-	private Mesh testCube1, testCube2, testCube3;
+	private Mesh testCube1, testCube2, cube;
 	private int traced = 0;
 
 	private Node node;
@@ -21,8 +27,8 @@ public class CubeNode {
 		testCube2.translate(x, y, z);
 		testCube2.setWireframe(true);
 //		
-		testCube3 = new Cube(Color.GREEN, 2);
-		testCube3.translate(x, y, z);
+		cube = new Cube(Color.GREEN, 2);
+		cube.translate(x, y, z);
 
 		this.node = new Node(xUnit, yUnit, zUnit);
 	}
@@ -36,28 +42,30 @@ public class CubeNode {
 			//testCube3.rotate(1, 1, 1);
 		}
 		
-		testCube3.setColor(node.getType().getColor());
+		cube.setColor(node.getType().getColor());
 		
 		if (NodeType.EMPTY == node.getType() && traced == 2) {
-			testCube3.setColor(Color.ORANGE);
+			cube.setColor(Color.ORANGE);
 
 		}else if(NodeType.EMPTY == node.getType() && traced == 3) {
-			testCube3.setColor(Color.CYAN);
+			cube.setColor(Color.CYAN);
+		}else if(NodeType.EMPTY == node.getType() && traced == 4) {
+			cube.setColor(Color.MAGENTA);
 		}
 		else if (NodeType.EMPTY == node.getType() && traced == 1) {
-			testCube3.setColor(Color.BLUE);
-			testCube3.rotate(1, 1, 1);
+			cube.setColor(Color.BLUE);
+			cube.rotate(1, 1, 1);
 		}
 	}
 
 	public void render(Graphics graphics, Camera camera) {
-		testCube3.render(graphics, camera);
+		cube.render(graphics, camera);
 //		testCube2.render(graphics, camera);
 //		testCube1.render(graphics, camera);
 	}
 
 	public int getAverageProjectedZ() {
-		return (int) testCube3.calcAverageProjectedZ();
+		return (int) cube.calcAverageProjectedZ();
 	}
 
 	public boolean wasProjected() {
@@ -79,10 +87,12 @@ public class CubeNode {
 
 	public void setTraced(int traced) {
 		this.traced = traced;
+		cube.setDefaultRotation();
 	}
 
 	public void setNeighborTraced() {
 		System.out.println("Traced Neighbor");
 		this.traced = 2;
+		cube.setDefaultRotation();
 	}
 }

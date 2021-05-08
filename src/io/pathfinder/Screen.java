@@ -18,7 +18,11 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import io.pathfinder.input.KeyInputEvent;
 import io.pathfinder.math.Vector3d;
@@ -27,6 +31,11 @@ import io.pathfinder.input.InputHandler;
 import io.pathfinder.input.InputManager;
 
 /**
+ * 
+ * Singleton Java AWT Canvas for 3D Pathfinder. Displays everything for the 3D
+ * pathfinder, acting as the main container Calls all the renders and updates.
+ * 
+ * TODO: Decouple JFrame and follow more closely to MVC design
  * 
  * @author Justin Scott
  *
@@ -37,7 +46,8 @@ public class Screen extends Canvas implements Runnable {
 
 	private boolean rendering = false;
 	private BufferStrategy bufferStrategy;
-	
+	private BufferedImage backgroundImage;
+
 	private JFrame frame;
 	private Camera camera;
 
@@ -64,15 +74,15 @@ public class Screen extends Canvas implements Runnable {
 
 	private TextRenderer textRenderer;
 	private static final Font DEBUG_FONT = new Font("verdana", Font.BOLD, 16);
-	
+
 	private static Screen screen;
-	private Object lock;
 	private boolean update;
-	
+
 	private long frameTick = 0;
-	
-	private Screen(){}
-	
+
+	private Screen() {
+	}
+
 	public int getScreenWidth() {
 		return frame.getWidth();
 	}
@@ -296,6 +306,13 @@ public class Screen extends Canvas implements Runnable {
 			e.printStackTrace();
 		}
 
+		try {
+			backgroundImage = ImageIO.read(new File("back.png"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		rendering = true;
 		update = true;
 		cubicGridSaveManager = CubicGridSaveManager.getCubicGridSaver();
@@ -318,8 +335,8 @@ public class Screen extends Canvas implements Runnable {
 			timerFrameDelay.calcDeltaTime();
 			timerSecond.calcDeltaTime();
 			if (timerFrameDelay.getDeltaTime() > targetFPSdelay) {
-				
-				if(update) {
+
+				if (update) {
 					update();
 					render();
 					frameTick++;
@@ -334,7 +351,7 @@ public class Screen extends Canvas implements Runnable {
 	public long getFrameTick() {
 		return frameTick;
 	}
-	
+
 	private void updateFramesPerSecond(long currentSysTime) {
 		if (timerSecond.getDeltaTime() >= 1) {
 			actualFPS = frames;
@@ -357,20 +374,20 @@ public class Screen extends Canvas implements Runnable {
 				camera.setSplitScreen(false);
 			}
 		}
-		
+
 		int screenCenterX = getScreenCenterX();
 		int screenCenterY = getScreenCenterY();
 
 		if (camera.isSplitScreen()) {
-			screenCenterX += ( getWidth() / 4.0);
+			screenCenterX += (getWidth() / 4.0);
 		}
 
 		crosshair.update(screenCenterX, screenCenterY, camera);
 		CubicGrid grid = cubicGridSaveManager.getCubicGrid();
-		if(grid!=null) {
+		if (grid != null) {
 			grid.update();
 		}
-		
+
 		inputHandler.handle();
 		updateText();
 
@@ -387,9 +404,15 @@ public class Screen extends Canvas implements Runnable {
 		Graphics2D g2d = (Graphics2D) graphics;
 		g2d.setStroke(new BasicStroke(1));
 
-		graphics.setColor(new Color(0, 4, 26));
-		graphics.fillRect(0, 0, getScreenWidth(), getScreenHeight());
+		if (backgroundImage != null) {
+			int w = backgroundImage.getWidth(null);
+			int h = backgroundImage.getHeight(null);
+			g2d.drawImage(backgroundImage, 0, 0, null);
+		} else {
 
+			graphics.setColor(new Color(0, 4, 26));
+			graphics.fillRect(0, 0, getScreenWidth(), getScreenHeight());
+		}
 		// testCube.render(graphics, camera);
 
 		if (editMode) {
@@ -400,12 +423,12 @@ public class Screen extends Canvas implements Runnable {
 		}
 		camera.createView();
 		CubicGrid cubicGrid = cubicGridSaveManager.getCubicGrid();
-		if(cubicGrid!=null) {
+		if (cubicGrid != null) {
 			cubicGrid.render(graphics, camera);
-		}else {
+		} else {
 			System.out.println("NULL GRID!");
 		}
-	
+
 		crosshair.render(graphics, camera.isSplitScreen() ? getWidth() / 2 + (getWidth() / 4) : getWidth() / 2,
 				getHeight() / 2);
 
@@ -414,7 +437,7 @@ public class Screen extends Canvas implements Runnable {
 		if (editMode) {
 
 			g2d = (Graphics2D) graphics;
-			g2d.setColor(Color.YELLOW);
+			g2d.setColor(Color.BLUE);
 			g2d.setStroke(new BasicStroke(3));
 			graphics.drawLine((int) (getWidth() / 2.0), 0, (int) (getWidth() / 2.0), getHeight());
 		}
@@ -424,29 +447,23 @@ public class Screen extends Canvas implements Runnable {
 	}
 
 	public static Screen getScreen() {
-		if(screen==null) {
+		if (screen == null) {
 			screen = new Screen();
 		}
 		return screen;
 	}
 
-	public Object getLock() {
-
-		return null;
-	}
-
 	public void setUpdate(boolean update) {
-		this.update  = update;
+		this.update = update;
 	}
 
 	public void setGridSize(int gridSize) {
 
-
-		if(gridSize <= MAX_GRID_SIZE && gridSize >= MIN_GRID_SIZE) {
+		if (gridSize <= MAX_GRID_SIZE && gridSize >= MIN_GRID_SIZE) {
 			System.out.println("Setting Size: " + gridSize);
 			GRID_SIZE = gridSize;
 		}
-		
+
 	}
 
 }

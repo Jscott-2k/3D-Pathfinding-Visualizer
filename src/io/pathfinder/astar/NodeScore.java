@@ -1,5 +1,6 @@
 package io.pathfinder.astar;
 
+
 public class NodeScore {
 	private double g = 0;
 	private double f = 0;

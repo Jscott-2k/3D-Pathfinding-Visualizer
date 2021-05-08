@@ -19,17 +19,15 @@ public class Driver {
 		return driver;
 	}
 
-	private Driver() {
-	}
-
+	private Driver() {}
+	
 	public static void main(String[] args) {
 		driver = Driver.getDriver();
 		driver.init();
 		driver.start();
 		driver.appLoop();
-
 	}
-
+	
 	private void init() {
 		System.out.println("Driver Init");
 		screen = Screen.getScreen();

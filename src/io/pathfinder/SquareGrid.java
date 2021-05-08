@@ -7,13 +7,27 @@ import java.awt.Point;
 import io.pathfinder.astar.Node;
 import io.pathfinder.astar.NodeType;
 
+
+/**
+ * 
+ * This class acts as a cross-section of the CubicGrid
+ * Used for the built-in editor of the cubic grid,
+ *  where the user can add and remove nodes of different types on a certain section of the grid
+ *  
+ * 
+ * 
+ * @Author Justin Scott
+ *
+ */
 public class SquareGrid {
 
 	private int y;
 	private int size;
-	private int hoveredX = 0, hoveredZ = 0;
+	
+	private int hoveredX = 0, hoveredZ = 0; //Index of the square being hovered by cursor
+	
+	// Each square represents a CubeNode of the grid. Cross section so it stores squares by only x and z value, not y.
 	private Square[][] squares;
-	//private CubicGrid cubicGrid;
 
 	public SquareGrid(int y, int size, int canvasWidth, int canvasHeight, CubicGrid cubicGrid) {
 
@@ -40,7 +54,7 @@ public class SquareGrid {
 				Square square = squares[x][z];
 				if (square.contains(mousePosition)) {
 					NodeType next = NodeType.getNextType(square.getNodeType());
-					square.setNodeType(next);
+					square.setNodeType(next); 
 				}
 			}
 		}
@@ -65,13 +79,11 @@ public class SquareGrid {
 			}
 		}
 	}
-
 	public void onRightRelease(Point mousePosition) {
 
 		if (mousePosition == null) {
 			return;
 		}
-
 		for (int x = 0; x < size; x++) {
 			for (int z = 0; z < size; z++) {
 				Square square = squares[x][z];

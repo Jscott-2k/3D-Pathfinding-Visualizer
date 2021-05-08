@@ -10,8 +10,18 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.HashMap;
 
+/**
+ * The InputManager contains the implementations for all keyEvents and mouseEvents
+ * Performs callbacks to stored KeyInputEvent and MouseInputEvents for handling each event.
+ * @author Justin Scott
+ *
+ */
 public class InputManager implements KeyListener, MouseListener, MouseWheelListener, MouseMotionListener {
 
+	
+	/**
+	 * Keys can have multiple states depending on the event. State tells which key event to execute in the InputHandler
+	 */
 	private HashMap<Integer, KeyState> keyStateMap;
 
 	private MouseInputEvent onMove;
