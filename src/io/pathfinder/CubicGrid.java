@@ -44,6 +44,8 @@ public class CubicGrid {
 	private boolean canUpdate = true;
 	private boolean searchingPath = false;
 
+	private boolean isWireframe = false;
+	
 	public CubicGrid(int size, int space, Canvas canvas) {
 		this.size = size;
 		double center = ((size - 1) * -space) / 2;
@@ -274,4 +276,17 @@ public class CubicGrid {
 		Driver.getDriver().getScreen().setUpdate(true);
 	}
 
+	public boolean isWireframe() {
+		return this.isWireframe;
+	}
+	
+	public void setIsWireframe(boolean isWireframe) {
+		this.isWireframe = isWireframe;
+		
+		for(CubeNode cubeNode : cubeNodes) {
+			cubeNode.setWireframe(this.isWireframe);
+		}
+		
+	}
+	
 }

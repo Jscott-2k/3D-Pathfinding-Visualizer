@@ -45,10 +45,10 @@ public class CubeNode {
 		cube.setColor(node.getType().getColor());
 		
 		if (NodeType.EMPTY == node.getType() && traced == 2) {
-			cube.setColor(Color.ORANGE);
+			cube.setColor(new Color(219,188,105));
 
 		}else if(NodeType.EMPTY == node.getType() && traced == 3) {
-			cube.setColor(Color.CYAN);
+			cube.setColor(new Color(113,59,147));
 		}else if(NodeType.EMPTY == node.getType() && traced == 4) {
 			cube.setColor(Color.MAGENTA);
 		}
@@ -94,5 +94,9 @@ public class CubeNode {
 		System.out.println("Traced Neighbor");
 		this.traced = 2;
 		cube.setDefaultRotation();
+	}
+
+	public void setWireframe(boolean isWireframe) {
+		this.cube.setWireframe(isWireframe);
 	}
 }

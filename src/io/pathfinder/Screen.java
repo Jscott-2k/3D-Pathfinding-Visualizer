@@ -4,6 +4,7 @@ import java.awt.AWTException;
 import java.awt.BasicStroke;
 import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -464,6 +465,10 @@ public class Screen extends Canvas implements Runnable {
 			GRID_SIZE = gridSize;
 		}
 
+	}
+
+	public JFrame getFrame() {
+		return frame;
 	}
 
 }
