@@ -13,8 +13,8 @@ import java.awt.Color;
  */
 public enum NodeType implements java.io.Serializable{
 	START(Color.GREEN),
-	EMPTY(Color.WHITE),
-	OBSTACLE(new Color(75,75,75)),
+	EMPTY(new Color(255,255,255, 100)),
+	OBSTACLE(new Color(75,75,75, 100)),
 	END(Color.RED);
 		
 	private Color color = Color.WHITE;

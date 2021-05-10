@@ -41,7 +41,6 @@ public class CubicGrid {
 	private int size = 0;
 	private Pathfinder pathfinder;
 	private boolean buildingPath = false;
-	private boolean canUpdate = true;
 	private boolean searchingPath = false;
 
 	private boolean isWireframe = false;
@@ -192,7 +191,7 @@ public class CubicGrid {
 
 	
 	/**
-	 * Every 10 frames the next node in the path is traced. Uses pathIndex and buildingPath field.
+	 * Every 15 frames the next node in the path is traced. Uses pathIndex and buildingPath field.
 	 * 
 	 * pathIndex tells which node is next to be traced
 	 */
@@ -200,7 +199,7 @@ public class CubicGrid {
 
 		if (buildingPath) {
 			long currentFrameTick = Driver.getDriver().getScreen().getFrameTick();
-			if (currentFrameTick % 10 == 0) {
+			if (currentFrameTick % 15 == 0) {
 
 				pathIndex++;
 				Node pathNode = path.get(pathIndex);

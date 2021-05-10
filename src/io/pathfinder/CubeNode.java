@@ -45,12 +45,12 @@ public class CubeNode {
 		cube.setColor(node.getType().getColor());
 		
 		if (NodeType.EMPTY == node.getType() && traced == 2) {
-			cube.setColor(new Color(219,188,105));
+			cube.setColor(new Color(219,188,105, 125));
 
 		}else if(NodeType.EMPTY == node.getType() && traced == 3) {
-			cube.setColor(new Color(113,59,147));
+			cube.setColor(new Color(0,255,255, 125));
 		}else if(NodeType.EMPTY == node.getType() && traced == 4) {
-			cube.setColor(Color.MAGENTA);
+			cube.setColor(new Color(255,0,255, 125));
 		}
 		else if (NodeType.EMPTY == node.getType() && traced == 1) {
 			cube.setColor(Color.BLUE);

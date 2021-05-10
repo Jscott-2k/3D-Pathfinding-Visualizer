@@ -297,7 +297,7 @@ public class Screen extends Canvas implements Runnable {
 		int screenCenterX = getScreenCenterX();
 		int screenCenterY = getScreenCenterY();
 
-		camera = new Camera(1, 1, 300, 80, screenConfiguration);
+		camera = new Camera(1, 1, 300, 70, screenConfiguration);
 
 		crosshair = new Crosshair(screenCenterX, screenCenterY, frame.getToolkit());
 

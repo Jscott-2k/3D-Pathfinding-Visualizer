@@ -36,6 +36,12 @@ public class Pathfinder {
 		return dist(n, end);
 	}
 
+	private double g(Node n) {
+
+		double g = gScores.get(n) + 1;
+		return g;
+	}
+	
 	private double f(Node n) {
 
 		double h = h(n);
@@ -45,11 +51,7 @@ public class Pathfinder {
 		return f;
 	}
 
-	private double g(Node n) {
 
-		double g = gScores.get(n) + 1;
-		return g;
-	}
 
 	private double dist(Node a, Node b) {
 //		return Math.sqrt(((b.getX() - a.getX()) * (b.getX() - a.getX()))
@@ -91,6 +93,11 @@ public class Pathfinder {
 		System.out.println("Neighbors:");
 		for (Node neighbor : neighbors) {
 
+			double tempG = gScores.get(current) + g(current);
+			if (gScores.get(neighbor) != null && tempG >= gScores.get(neighbor)){
+				continue;
+			}
+			
 			if (neighbor == null) {
 				continue;
 			}
@@ -179,11 +186,8 @@ public class Pathfinder {
 
 		if (runMode == 0) {
 
-			while (!this.open.isEmpty()) {
+			while (!this.open.isEmpty() && !hasPath) {
 				hasPath = step();
-				if (hasPath) {
-					break;
-				}
 			}
 		} else {
 			running = true;
@@ -191,7 +195,7 @@ public class Pathfinder {
 	}
 
 	/**
-	 * Every 5 frames continues next step of pathfinding A* algorithm 
+	 * Every 7 frames continues next step of pathfinding A* algorithm 
 	 * Requires that the pathfinder is running in runMode 1 and is still running
 	 */
 	public void update() {
@@ -201,7 +205,7 @@ public class Pathfinder {
 		}
 
 		long currentFrameTick = Driver.getDriver().getScreen().getFrameTick();
-		if (running && !this.open.isEmpty() && !hasPath && currentFrameTick % 5 == 0) {
+		if (running && !this.open.isEmpty() && !hasPath && currentFrameTick % 7 == 0) {
 			hasPath = step();
 		}
 		if (hasPath || this.open.isEmpty()) {
