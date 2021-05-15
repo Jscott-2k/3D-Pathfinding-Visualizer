@@ -8,10 +8,6 @@ public class CubicGridSaveManager {
 
 	private static CubicGridSaveManager INSTANCE;
 
-	/**
-	 * 
-	 * @return
-	 */
 	public static CubicGridSaveManager getCubicGridSaver() {
 		if (INSTANCE == null) {
 			INSTANCE = new CubicGridSaveManager();
@@ -19,9 +15,6 @@ public class CubicGridSaveManager {
 		return INSTANCE;
 	}
 
-	/**
-	 * 
-	 */
 	private CubicGridSaveManager() {
 	}
 
@@ -38,7 +31,7 @@ public class CubicGridSaveManager {
 	}
 
 	/**
-	 * 
+	 * Save the 3dpv
 	 * @param name
 	 * @throws IOException
 	 */
@@ -53,6 +46,11 @@ public class CubicGridSaveManager {
 
 	}
 
+	/**
+	 * load the 3dpv
+	 * @param name
+	 * @throws IOException
+	 */
 	public boolean load(File file) throws Exception {
 		
 		Driver.getDriver().getScreen().setUpdate(false);

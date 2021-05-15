@@ -6,8 +6,6 @@ import java.util.HashMap;
 /**
  * Stores an InputManager object and handles the user input with the handle method.
  * 
- * 
- * 
  * @author Justin Scott
  *
  */
